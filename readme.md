@@ -1,9 +1,9 @@
-# \<Project Name\> Scrum Team
+# Group 4 Scrum Team
 ## Product Owner
-\<Team Member Name\>
+Amaan Syed
 ## Scrum Master
-\<Team Member Name\>
+Sanjyot Sathe
 ## Developers
-- \<Team Member Name\>
-- \<Team Member Name\>
-- \<Team Member Name\>
+- Rucha Tatawar
+- Sumanth Dasari
+- Pranav Bakale
