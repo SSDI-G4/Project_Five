@@ -8,27 +8,42 @@ import {
   Box
 } from '@mui/material';
 import './userPhotos.css';
+import fetchModel from '../../lib/fetchModelData'; 
 
 class UserPhotos extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       photos: [],
+      loading: true, 
+      error: null 
     };
   }
 
   componentDidMount() {
-    const userId = this.props.match.params.userId;
-    const userPhotos = window.models.photoOfUserModel(userId);
-    console.log(userPhotos);
-    if (userPhotos) {
-      this.setState({ photos: userPhotos });
-    }
+    const userId = this.props.match.params.userId; 
+    const url = `/photosOfUser/${userId}`; 
+
+    fetchModel(url)
+      .then(response => {
+        this.setState({ photos: response.data, loading: false }); 
+      })
+      .catch(err => {
+        this.setState({ error: err, loading: false }); 
+      });
   }
 
   render() {
-    const { photos } = this.state;
-    const userId = this.props.match.params.userId;
+    const { photos, loading, error } = this.state; 
+    const userId = this.props.match.params.userId; 
+
+    if (loading) {
+      return <Typography variant="body1">Loading photos...</Typography>; 
+    }
+
+    if (error) {
+      return <Typography variant="body1">Error: {error.statusText}</Typography>; 
+    }
 
     return (
       <Box>
@@ -74,6 +89,3 @@ class UserPhotos extends React.Component {
 }
 
 export default UserPhotos;
-
-
-
