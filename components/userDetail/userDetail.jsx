@@ -2,12 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Typography, Button } from '@mui/material';
 import './userDetail.css';
+import fetchModel from '../../lib/fetchModelData'; 
 
 class UserDetail extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      user: null 
+      user: null,
+      loading: true, 
+      error: null 
     };
   }
 
@@ -23,15 +26,26 @@ class UserDetail extends React.Component {
 
   loadUserDetails() {
     const userId = this.props.match.params.userId;
-    const user = window.models.userModel(userId); 
-    this.setState({ user });
+    const url = `/user/${userId}`; 
+
+    fetchModel(url)
+      .then(response => {
+        this.setState({ user: response.data, loading: false }); 
+      })
+      .catch(err => {
+        this.setState({ error: err, loading: false }); 
+      });
   }
 
   render() {
-    const { user } = this.state;
+    const { user, loading, error } = this.state; 
 
-    if (!user) {
+    if (loading) {
       return <Typography>Loading...</Typography>; 
+    }
+
+    if (error) {
+      return <Typography>Error: {error.statusText}</Typography>; 
     }
 
     return (
@@ -49,4 +63,3 @@ class UserDetail extends React.Component {
 }
 
 export default UserDetail;
-
