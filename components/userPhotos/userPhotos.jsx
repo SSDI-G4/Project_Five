@@ -1,123 +1,79 @@
-// import React from 'react';
-// import {
-//   Typography
-// } from '@mui/material';
-// import './userPhotos.css';
-
-
-// /**
-//  * Define UserPhotos, a React componment of project #5
-//  */
-// class UserPhotos extends React.Component {
-//   constructor(props) {
-//     super(props);
-
-//   }
-
-//   render() {
-//     return (
-//       <Typography variant="body1">
-//       This should be the UserPhotos view of the PhotoShare app. Since
-//       it is invoked from React Router the params from the route will be
-//       in property match. So this should show details of user:
-//       {this.props.match.params.userId}. You can fetch the model for the user from
-//       window.models.photoOfUserModel(userId):
-//         <Typography variant="caption">
-//           {JSON.stringify(window.models.photoOfUserModel(this.props.match.params.userId))}
-//         </Typography>
-//       </Typography>
-
-//     );
-//   }
-// }
-
-// export default UserPhotos;
 import React from 'react';
-import { Typography, Card, CardContent, CardMedia } from '@mui/material';
+import {
+  Typography,
+  Card,
+  CardMedia,
+  CardContent,
+  Link,
+  Box
+} from '@mui/material';
 import './userPhotos.css';
 
 class UserPhotos extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      user: null, 
-      photoUrls: [], 
-      maxPhotoCount: 10 
+      photos: [],
     };
   }
 
   componentDidMount() {
-    this.loadUserDetails();
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this.props.match.params.userId !== prevProps.match.params.userId) {
-      this.loadUserDetails();
-    }
-  }
-
-  loadUserDetails() {
     const userId = this.props.match.params.userId;
-    const user = window.models.userModel(userId);
-    this.setState({ user }, this.loadUserPhotos);
-  }
-
-  loadUserPhotos() {
-    const { user, maxPhotoCount } = this.state;
-
-    if (!user) return;
-
-    const photoUrls = [];
-    for (let i = 1; i <= maxPhotoCount; i++) {
-      const url = `/images/${user.last_name.toLowerCase()}${i}.jpg`; 
-
-      
-      const img = new Image();
-      img.src = url;
-      img.onload = () => {
-        photoUrls.push(url);
-        this.setState({ photoUrls: [...photoUrls] });
-      };
-      img.onerror = () => {
-        
-        
-      };
+    const userPhotos = window.models.photoOfUserModel(userId);
+    console.log(userPhotos);
+    if (userPhotos) {
+      this.setState({ photos: userPhotos });
     }
   }
 
   render() {
-    const { user, photoUrls } = this.state;
-
-    if (!user) {
-      return <Typography>Loading...</Typography>;
-    }
-
-    if (photoUrls.length === 0) {
-      return <Typography>No photos available for this user.</Typography>;
-    }
+    const { photos } = this.state;
+    const userId = this.props.match.params.userId;
 
     return (
-      <div className="user-photos">
-        {photoUrls.map((url, index) => (
-          <Card key={index} className="photo-card">
-            <CardMedia
-              component="img"
-              height="200"
-              image={url}
-              alt={`User photo ${index + 1}`}
-            />
-            <CardContent>
-              <Typography variant="body2">
-                Photo {index + 1} for {user.first_name} {user.last_name}
-              </Typography>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Box>
+        {photos.length > 0 ? (
+          photos.map((photo) => (
+            <Card key={photo._id} sx={{ marginBottom: 2 }}>
+              <CardMedia
+                component="img"
+                alt={`Photo of ${userId}`}
+                height="140"
+                image={`images/${photo.file_name}`} 
+              />
+              <CardContent>
+                <Typography variant="body2" color="text.secondary">
+                  Created on: {new Date(photo.date_time).toLocaleString()} 
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  Comments:
+                </Typography>
+                {photo.comments && photo.comments.length > 0 ? (
+                  photo.comments.map((comment) => (
+                    <Box key={comment._id} sx={{ marginBottom: 1 }}>
+                      <Typography variant="caption">
+                        <Link href={`http://localhost:3000/photo-share.html#/users/${comment.user._id}`} underline="hover">
+                          {`${comment.user.first_name} ${comment.user.last_name}`} 
+                        </Link>
+                        : {comment.comment} (on {new Date(comment.date_time).toLocaleString()}) 
+                      </Typography>
+                    </Box>
+                  ))
+                ) : (
+                  <Typography variant="caption">No comments available.</Typography>
+                )}
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <Typography variant="body1">No photos available for this user.</Typography>
+        )}
+      </Box>
     );
   }
 }
 
 export default UserPhotos;
+
 
 
