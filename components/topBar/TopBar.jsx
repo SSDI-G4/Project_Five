@@ -71,25 +71,26 @@ class TopBar extends React.Component {
     }
 
     return (
-      <AppBar className="topbar-appBar" position="absolute">
+      <AppBar className="topbar-appBar" position="fixed">
         <Toolbar>
           <Typography variant="h6" color="inherit">
             Group 4
           </Typography>
           <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: 'flex', justifyContent: 'left', flexGrow: 1 }}>
-          <Typography variant="h6" color="inherit" sx={{ marginRight: '15px' }}>
-            {title}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', flexGrow: 1 }}>
+          <Typography variant="h6" color="inherit" textAlign={'center'}>
+            App Version:
           </Typography>
-          </Box>
-          <Typography variant="h6" color="inherit" sx={{ marginRight: '5px', fontSize: '15px' }}>
-            Version:
-          </Typography>
+          <Box sx={{ width: '10px' }} />
           {version && (
             <Typography variant="body1" color="inherit">
               {version}
             </Typography>
           )}
+          </Box>
+          <Typography variant="h6" color="inherit">
+            {title}
+          </Typography>
         </Toolbar>
       </AppBar>
     );
