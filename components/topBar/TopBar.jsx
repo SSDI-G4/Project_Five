@@ -77,9 +77,11 @@ class TopBar extends React.Component {
             Group 4
           </Typography>
           <Box sx={{ flexGrow: 1 }} />
+          <Box sx={{ display: 'flex', justifyContent: 'left', flexGrow: 1 }}>
           <Typography variant="h6" color="inherit" sx={{ marginRight: '15px' }}>
             {title}
           </Typography>
+          </Box>
           <Typography variant="h6" color="inherit" sx={{ marginRight: '5px', fontSize: '15px' }}>
             Version:
           </Typography>
