@@ -53,7 +53,7 @@ class UserPhotos extends React.Component {
               <CardMedia
                 component="img"
                 alt={`Photo of ${userId}`}
-                height="140"
+                width="140"
                 image={`images/${photo.file_name}`} 
               />
               <CardContent>
