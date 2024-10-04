@@ -1,27 +1,63 @@
 import React from 'react';
-import {
-  Typography
-} from '@mui/material';
+import { Link } from 'react-router-dom';
+import { Typography, Button } from '@mui/material';
 import './userDetail.css';
+import fetchModel from '../../lib/fetchModelData'; 
 
-
-/**
- * Define UserDetail, a React component of project #5
- */
 class UserDetail extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      user: null,
+      loading: true, 
+      error: null 
+    };
+  }
+
+  componentDidMount() {
+    this.loadUserDetails();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.match.params.userId !== prevProps.match.params.userId) {
+      this.loadUserDetails();
+    }
+  }
+
+  loadUserDetails() {
+    const userId = this.props.match.params.userId;
+    const url = `/user/${userId}`; 
+
+    fetchModel(url)
+      .then(response => {
+        this.setState({ user: response.data, loading: false }); 
+      })
+      .catch(err => {
+        this.setState({ error: err, loading: false }); 
+      });
   }
 
   render() {
+    const { user, loading, error } = this.state; 
+
+    if (loading) {
+      return <Typography>Loading...</Typography>; 
+    }
+
+    if (error) {
+      return <Typography>Error: {error.statusText}</Typography>; 
+    }
+
     return (
-      <Typography variant="body1">
-        This should be the UserDetail view of the PhotoShare app. Since
-        it is invoked from React Router the params from the route will be
-        in property match. So this should show details of user:
-        {this.props.match.params.userId}. You can fetch the model for the
-        user from window.models.userModel(userId).
-      </Typography>
+      <div className="user-detail">
+        <Typography variant="h5">{user.first_name} {user.last_name}</Typography>
+        <Typography variant="body1">Location: {user.location}</Typography>
+        <Typography variant="body1">Occupation: {user.occupation}</Typography>
+        <Typography variant="body1">Description: {user.description}</Typography>
+        <Button variant="contained" component={Link} to={`/photos/${user._id}`}>
+          View Photos
+        </Button>
+      </div>
     );
   }
 }
