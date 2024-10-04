@@ -8,7 +8,7 @@ import {
   Box
 } from '@mui/material';
 import './userPhotos.css';
-import fetchModel from '../../lib/fetchModelData'; 
+import fetchModel from '../../lib/fetchModelData';
 
 class UserPhotos extends React.Component {
   constructor(props) {
@@ -65,12 +65,41 @@ class UserPhotos extends React.Component {
                 </Typography>
                 {photo.comments && photo.comments.length > 0 ? (
                   photo.comments.map((comment) => (
-                    <Box key={comment._id} sx={{ marginBottom: 1 }}>
-                      <Typography variant="caption">
-                        <Link href={`http://localhost:3000/photo-share.html#/users/${comment.user._id}`} underline="hover">
-                          {`${comment.user.first_name} ${comment.user.last_name}`} 
+                    <Box
+                      key={comment._id}
+                      sx={{
+                        marginBottom: 1,
+                        padding: 1,
+                        backgroundColor: '#f5f5f5',
+                        borderRadius: 1
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: 'block',
+                          fontWeight: 'bold',
+                          marginBottom: '0.5rem',
+                          color: '#4a4a4a',
+                        }}
+                      >
+                        <Link
+                          href={`http://localhost:3000/photo-share.html#/users/${comment.user._id}`}
+                          underline="hover"
+                          sx={{
+                            color: '#1976d2',
+                            textDecoration: 'none',
+                            '&:hover': {
+                              textDecoration: 'underline',
+                            }
+                          }}
+                        >
+                          {`${comment.user.first_name} ${comment.user.last_name}`}
                         </Link>
-                        : {comment.comment} (on {new Date(comment.date_time).toLocaleString()}) 
+                        : {comment.comment}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#757575' }}>
+                        (on {new Date(comment.date_time).toLocaleString()})
                       </Typography>
                     </Box>
                   ))
