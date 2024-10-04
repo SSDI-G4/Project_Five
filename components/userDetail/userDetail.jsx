@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Typography, Button } from '@mui/material';
+import { Typography, Button, Grid, Card, CardContent, CircularProgress } from '@mui/material';
 import './userDetail.css';
 import fetchModel from '../../lib/fetchModelData'; 
 
@@ -41,23 +41,52 @@ class UserDetail extends React.Component {
     const { user, loading, error } = this.state; 
 
     if (loading) {
-      return <Typography>Loading...</Typography>; 
+      return (
+        <Grid container justifyContent="center" style={{ height: '100vh' }}>
+          <CircularProgress />
+          <Typography>Loading...</Typography>
+        </Grid>
+      ); 
     }
 
     if (error) {
-      return <Typography>Error: {error.statusText}</Typography>; 
+      return (
+        <Grid container justifyContent="center" style={{ height: '100vh' }}>
+          <Typography color="error">Error: {error.statusText}</Typography>
+        </Grid>
+      ); 
     }
 
     return (
-      <div className="user-detail">
-        <Typography variant="h5">{user.first_name} {user.last_name}</Typography>
-        <Typography variant="body1">Location: {user.location}</Typography>
-        <Typography variant="body1">Occupation: {user.occupation}</Typography>
-        <Typography variant="body1">Description: {user.description}</Typography>
-        <Button variant="contained" component={Link} to={`/photos/${user._id}`}>
-          View Photos
-        </Button>
-      </div>
+      <Grid container justifyContent="flex-start" style={{ padding: '20px' }}>
+        <Grid item xs={12} md={8} lg={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h4" gutterBottom>
+                {user.first_name} {user.last_name}
+              </Typography>
+              <Typography variant="body1" color="textSecondary" paragraph>
+                <strong>Location:</strong> {user.location}
+              </Typography>
+              <Typography variant="body1" color="textSecondary" paragraph>
+                <strong>Occupation:</strong> {user.occupation}
+              </Typography>
+              <Typography variant="body1" color="textSecondary" paragraph>
+                <strong>Description:</strong> {user.description}
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                component={Link}
+                to={`/photos/${user._id}`}
+                style={{ marginTop: '16px' }}
+              >
+                View Photos
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
     );
   }
 }
