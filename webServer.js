@@ -46,7 +46,7 @@ const SchemaInfo = require("./schema/schemaInfo.js");
 
 // XXX - Your submission should work without this line. Comment out or delete
 // this line for tests and before submission!
-const models = require("./modelData/photoApp.js").models;
+// const models = require("./modelData/photoApp.js").models;
 mongoose.set("strictQuery", false);
 mongoose.connect("mongodb://127.0.0.1/project6", {
   useNewUrlParser: true,
@@ -143,35 +143,106 @@ app.get("/test/:p1", function (request, response) {
  * URL /user/list - Returns all the User objects.
  */
 app.get("/user/list", function (request, response) {
-  response.status(200).send(models.userListModel());
+  // response.status(200).send(models.userListModel());
+  // User.find({}, function (err, users) {
+  //   if (err) {
+  //     console.error('Error fetching user list:', err);
+  //     response.status(500).send(JSON.stringify(err));
+  //     return;
+  //   }
+  //   response.status(200).send(users);
+  // });
+  User.find({}, '_id first_name last_name', function (err, users) { // Select only _id, first_name, and last_name
+    if (err) {
+      console.error('Error fetching user list:', err);
+      response.status(500).send(JSON.stringify(err));
+      return;
+    }
+    response.status(200).send(users);
+  });
 });
 
 /**
  * URL /user/:id - Returns the information for User (id).
  */
-app.get("/user/:id", function (request, response) {
+app.get("/user/:id", async function (request, response) {
+  // const id = request.params.id;
+  // const user = models.userModel(id);
+  // if (user === null) {
+  //   console.log("User with _id:" + id + " not found.");
+  //   response.status(400).send("Not found");
+  //   return;
+  // }
+  // response.status(200).send(user);
+  // const id = request.params.id;
+  // User.findById(id, function (err, user) {
+  //   if (err || !user) {
+  //     console.log("User with _id: " + id + " not found.");
+  //     response.status(400).send("Not found");
+  //     return;
+  //   }
+  //   response.status(200).send(user);
+  // });
   const id = request.params.id;
-  const user = models.userModel(id);
-  if (user === null) {
-    console.log("User with _id:" + id + " not found.");
-    response.status(400).send("Not found");
-    return;
+
+  // Validate the ID format before querying
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return response.status(400).send("Invalid ID format");
   }
-  response.status(200).send(user);
+
+  try {
+    // Use async/await to query the database and exclude the __v field
+    const user = await User.findById(id).select('-__v'); // Excludes __v field
+
+    if (!user) {
+      // If user is not found, return a 400 status
+      console.log("User with _id: " + id + " not found.");
+      return response.status(400).send("User not found");
+    }
+
+    // If user is found, send it as the response
+    return response.status(200).send(user);
+  } catch (err) {
+    // Handle any errors that occur during the database query
+    console.error('Error fetching user:', err);
+    return response.status(500).send("Internal Server Error");
+  }
 });
 
 /**
  * URL /photosOfUser/:id - Returns the Photos for User (id).
  */
-app.get("/photosOfUser/:id", function (request, response) {
+app.get("/photosOfUser/:id", async function (request, response) {
+  // const id = request.params.id;
+  // const photos = models.photoOfUserModel(id);
+  // if (photos.length === 0) {
+  //   console.log("Photos for user with _id:" + id + " not found.");
+  //   response.status(400).send("Not found");
+  //   return;
+  // }
+  // response.status(200).send(photos);
+
   const id = request.params.id;
-  const photos = models.photoOfUserModel(id);
-  if (photos.length === 0) {
-    console.log("Photos for user with _id:" + id + " not found.");
-    response.status(400).send("Not found");
-    return;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return response.status(400).send("Invalid ID format");
   }
-  response.status(200).send(photos);
+
+  try {
+    const photos = await Photo.find({ user_id: id })
+    .populate({path: "comments", select: "comment_date text"})
+    .select("-__v")
+    .exec();
+
+    if (photos.length === 0) {
+      console.log("Photos for user with _id:" + id + " not found.");
+      return response.status(400).send("Photos not found for the user");
+    }
+    response.status(200).send(photos);
+  } catch (err) {
+    console.error('Error fetching photos for user:', err);
+    response.status(500).send("Internal Server Error");
+  }
 });
 
 const server = app.listen(3000, function () {
