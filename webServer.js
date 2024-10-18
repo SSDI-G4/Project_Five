@@ -158,14 +158,6 @@ app.get("/user/list", function (request, response) {
  * URL /user/:id - Returns the information for User (id).
  */
 app.get("/user/:id", async function (request, response) {
-  // const id = request.params.id;
-  // const user = models.userModel(id);
-  // if (user === null) {
-  //   console.log("User with _id:" + id + " not found.");
-  //   response.status(400).send("Not found");
-  //   return;
-  // }
-  // response.status(200).send(user);
   const id = request.params.id;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -189,92 +181,6 @@ app.get("/user/:id", async function (request, response) {
 /**
  * URL /photosOfUser/:id - Returns the Photos for User (id).
  */
-// app.get("/photosOfUser/:id", async function (request, response) {
-//   // const id = request.params.id;
-//   // const photos = models.photoOfUserModel(id);
-//   // if (photos.length === 0) {
-//   //   console.log("Photos for user with _id:" + id + " not found.");
-//   //   response.status(400).send("Not found");
-//   //   return;
-//   // }
-//   // response.status(200).send(photos);
-
-//   // const id = request.params.id;
-
-//   // if (!mongoose.Types.ObjectId.isValid(id)) {
-//   //   return response.status(400).send("Invalid ID format");
-//   // }
-
-//   // try {
-//   //   const photos = await Photo.find({ user_id: id })
-//   //   .populate({path: "comments", select: "comment_date text"})
-//   //   .select("-__v")
-//   //   .exec();
-
-//   //   if (photos.length === 0) {
-//   //     console.log("Photos for user with _id:" + id + " not found.");
-//   //     return response.status(400).send("Photos not found for the user");
-//   //   }
-//   //   response.status(200).send(photos);
-//   // } catch (err) {
-//   //   console.error('Error fetching photos for user:', err);
-//   //   response.status(500).send("Internal Server Error");
-//   // }
-
-//   const id = request.params.id;
-
-//   if (!mongoose.Types.ObjectId.isValid(id)) {
-//     return response.status(400).send("Invalid ID format");
-//   }
-
-//   try {
-//     const photos = await Photo.find({ user_id: id })
-//       .populate({
-//         path: 'comments.user_id',
-//         model: 'User', 
-//         select: 'first_name last_name _id',
-//         match: { _id: { $ne: null } }
-//       })
-//       .select('-__v')
-//       .exec();
-
-//     if (photos.length === 0) {
-//       return response.status(400).send("Photos not found for the user");
-//     }
-
-//     response.status(200).send(photos);
-//   } catch (err) {
-//     console.error('Error fetching photos for user:', err);
-//     response.status(500).send("Internal Server Error");
-//   }
-
-//   // const id = request.params.id;
-
-//   // if (!mongoose.Types.ObjectId.isValid(id)) {
-//   //   return response.status(400).send("Invalid ID format");
-//   // }
-
-//   // try {
-//   //   const photos = await Photo.find({ user_id: id })
-//   //     .populate({
-//   //       path: 'comments.user_id', // Populate user_id from comments
-//   //       model: 'User',            // Explicitly tell Mongoose to use the User model
-//   //       select: 'first_name last_name' // Only retrieve first_name and last_name
-//   //     })
-//   //     .select('-__v')
-//   //     .exec();
-
-//   //   if (photos.length === 0) {
-//   //     return response.status(400).send("Photos not found for the user");
-//   //   }
-
-//   //   response.status(200).send(photos);
-//   // } catch (err) {
-//   //   console.error('Error fetching photos for user:', err);
-//   //   response.status(500).send("Internal Server Error");
-//   // }
-  
-// });
 app.get("/photosOfUser/:id", function (request, response) {
   const id = request.params.id;
   Photo.aggregate([
@@ -325,19 +231,14 @@ app.get("/photosOfUser/:id", function (request, response) {
       } }
   ], function (err, photos) {
     if (err) {
-      // Query returned an error. We pass it back to the browser with an
-      // Internal Service Error (500) error code.
       console.error("Error in /photosOfUser/:id", err);
       response.status(500).send(JSON.stringify(err));
       return;
     }
     if (photos.length === 0) {
-      // Query didn't return an error but didn't find the SchemaInfo object -
-      // This is also an internal error return.
       response.status(400).send();
       return;
     }
-    // We got the object - return it in JSON format.
     response.end(JSON.stringify(photos));
   });
 });
