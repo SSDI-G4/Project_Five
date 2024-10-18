@@ -2,8 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { List, ListItem, ListItemText, CircularProgress, Box, Typography } from '@mui/material';
 import './userList.css';
-import axios from 'axios';
-
+import fetchModel from '../../lib/fetchModelData';
 
 class UserList extends React.Component {
   constructor(props) {
@@ -17,7 +16,7 @@ class UserList extends React.Component {
 
   componentDidMount() {
     const url = '/user/list';
-    axios.get(url)
+    fetchModel(url)
       .then(response => {
         this.setState({ users: response.data, loading: false });
       })
