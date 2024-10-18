@@ -64,7 +64,7 @@ class TopBar extends React.Component {
       if (location.pathname.startsWith('/photos/')) {
         title = user ? `Photos of ${user.first_name} ${user.last_name}` : 'Loading...';
       } else if (location.pathname.startsWith('/users/')) {
-        title = user ? `${user.first_name} ${user.last_name}` : 'Loading...';
+        title = user ? `Details of ${user.first_name} ${user.last_name}` : 'Loading...';
       } else {
         title = 'PhotoShare App'; 
       }
