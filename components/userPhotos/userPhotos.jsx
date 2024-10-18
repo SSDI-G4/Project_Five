@@ -54,17 +54,18 @@ class UserPhotos extends React.Component {
                 component="img"
                 alt={`Photo of ${userId}`}
                 width="140"
-                image={`images/${photo.file_name}`} 
+                image={`images/${photo.file_name}`}
               />
               <CardContent>
                 <Typography variant="body2" color="text.secondary">
-                  Created on: {new Date(photo.date_time).toLocaleString()} 
+                  Created on: {new Date(photo.date_time).toLocaleString()}
                 </Typography>
                 <Typography variant="body1" gutterBottom>
                   Comments:
                 </Typography>
                 {photo.comments && photo.comments.length > 0 ? (
-                  photo.comments.map((comment) => (
+                photo.comments.map((comment) => (
+                  comment.user_id ? (  // Ensure comment.user_id exists after population
                     <Box
                       key={comment._id}
                       sx={{
@@ -84,7 +85,7 @@ class UserPhotos extends React.Component {
                         }}
                       >
                         <Link
-                          href={`http://localhost:3000/photo-share.html#/users/${comment.user._id}`}
+                          href={`http://localhost:3000/photo-share.html#/users/${comment.user_id._id}`}
                           underline="hover"
                           sx={{
                             color: '#1976d2',
@@ -94,7 +95,7 @@ class UserPhotos extends React.Component {
                             }
                           }}
                         >
-                          {`${comment.user.first_name} ${comment.user.last_name}`}
+                          {`${comment.user_id.first_name} ${comment.user_id.last_name}`} {/* Correctly access user's name */}
                         </Link>
                         : {comment.comment}
                       </Typography>
@@ -102,16 +103,21 @@ class UserPhotos extends React.Component {
                         (on {new Date(comment.date_time).toLocaleString()})
                       </Typography>
                     </Box>
-                  ))
-                ) : (
-                  <Typography variant="caption">No comments available.</Typography>
-                )}
-              </CardContent>
-            </Card>
-          ))
-        ) : (
-          <Typography variant="body1">No photos available for this user.</Typography>
-        )}
+                  ) : (
+                    <Typography variant="caption" key={comment._id}>
+                      Comment details missing.
+                    </Typography>
+                  )
+                ))
+              ) : (
+                <Typography variant="caption">No comments available.</Typography>
+              )}
+            </CardContent>
+          </Card>
+        ))
+      ) : (
+        <Typography variant="body1">No photos available for this user.</Typography>
+      )}
       </Box>
     );
   }
