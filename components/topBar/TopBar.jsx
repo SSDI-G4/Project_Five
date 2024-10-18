@@ -12,14 +12,14 @@ class TopBar extends React.Component {
     super(props);
     this.state = {
       user: null,
-      version: null 
+      version: null
     };
   }
 
   componentDidMount() {
     axios.get('/test/info')
       .then((response) => {
-        const version = response.data.__v;  
+        const version = response.data.version;  
         this.setState({ version });
       })
       .catch((error) => {
