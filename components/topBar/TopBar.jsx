@@ -4,21 +4,22 @@ import {
 } from '@mui/material';
 import { withRouter } from 'react-router-dom';
 import './TopBar.css';
-import fetchModel from '../../lib/fetchModelData'; 
+import axios from 'axios';
+
 
 class TopBar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       user: null,
-      version: null 
+      version: null
     };
   }
 
   componentDidMount() {
-    fetchModel('/test/info')
+    axios.get('/test/info')
       .then((response) => {
-        const version = response.data.__v;  
+        const version = response.data.version;  
         this.setState({ version });
       })
       .catch((error) => {
@@ -43,7 +44,7 @@ class TopBar extends React.Component {
     if (userId) {
         try {
             
-            const response = await fetchModel(`/user/${userId}`);
+            const response = await axios.get(`/user/${userId}`);
             const user = response.data; 
             this.setState({ user });
         } catch (error) {
@@ -64,7 +65,7 @@ class TopBar extends React.Component {
       if (location.pathname.startsWith('/photos/')) {
         title = user ? `Photos of ${user.first_name} ${user.last_name}` : 'Loading...';
       } else if (location.pathname.startsWith('/users/')) {
-        title = user ? `${user.first_name} ${user.last_name}` : 'Loading...';
+        title = user ? `Details of ${user.first_name} ${user.last_name}` : 'Loading...';
       } else {
         title = 'PhotoShare App'; 
       }
