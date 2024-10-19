@@ -2,7 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Typography, Button, Grid, Card, CardContent, CircularProgress } from '@mui/material';
 import './userDetail.css';
-import fetchModel from '../../lib/fetchModelData'; 
+import axios from 'axios';
+
 
 class UserDetail extends React.Component {
   constructor(props) {
@@ -28,7 +29,7 @@ class UserDetail extends React.Component {
     const userId = this.props.match.params.userId;
     const url = `/user/${userId}`; 
 
-    fetchModel(url)
+    axios.get(url)
       .then(response => {
         this.setState({ user: response.data, loading: false }); 
       })
