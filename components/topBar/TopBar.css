@@ -1,4 +1,10 @@
 .topbar-appBar {
-  height: 60;
-  justify-content: 'center';
+  position: fixed; 
+  top: 0;         
+  left: 0;         
+  right: 0;        
+  margin: 0 !important;      
+  padding: 0 !important;     
+  height: 60px;   
+  z-index: 1000; 
 }
