@@ -249,6 +249,63 @@ app.get("/photosOfUser/:id", function (request, response) {
   });
 });
 
+const isAuthenticated = (req, res, next) => {
+  if (!req.session.userId) {
+    return res.status(401).send("Unauthorized");
+  }
+  next();
+};
+
+// Admin Login Endpoint
+
+app.post("/admin/login", async (request, response) => {
+  const { login_name } = request.body;
+
+  if (!login_name) {
+    return response.status(400).send("Login name is required");
+  }
+
+  try {
+    const user = await User.findOne({ login_name });
+
+    if (!user) {
+      return response.status(400).send("Invalid login name");
+    }
+
+    // Store user info in session
+    request.session.userId = user._id; // or any other user info needed
+    response.status(200).send({
+      _id: user._id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      login_name: user.login_name,
+    });
+  } catch (error) {
+    console.error("Error during login:", error);
+    response.status(500).send("Internal Server Error");
+  }
+});
+
+
+// Admin Logout Endpoint
+app.post("/admin/logout", (request, response) => {
+  if (!request.session.userId) {
+    return response.status(400).send("User not logged in");
+  }
+
+  request.session.destroy(err => {
+    if (err) {
+      console.error("Error during logout:", err);
+      return response.status(500).send("Internal Server Error");
+    }
+    response.status(200).send("Logged out successfully");
+  });
+});
+
+// Apply the middleware to all routes that need protection
+app.use("/user", isAuthenticated); // Protect user routes
+app.use("/photosOfUser", isAuthenticated); // Protect photo routes
+
 const server = app.listen(3000, function () {
   const port = server.address().port;
   console.log(
