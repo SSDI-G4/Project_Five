@@ -207,49 +207,159 @@
 
 
 
+// import React, { useState } from 'react';
+// import { Button, TextField, Typography, Box } from '@mui/material';
+// import axios from 'axios';
+// import './LoginRegister.css';
+
+// const LoginRegister = ({ onLogin }) => {
+//     const [loginName, setLoginName] = useState('');
+//     const [password, setPassword] = useState('weak'); // Default to "weak" for already registered users
+//     const [errorMessage, setErrorMessage] = useState('');
+
+//     const handleLogin = async (e) => {
+//         e.preventDefault();
+//         try {
+//             // Use "weak" password for already registered users
+//             const response = await axios.post('/admin/login', { login_name: loginName, password });
+//             onLogin(response.data); // Notify parent component of successful login
+//         } catch (error) {
+//             setErrorMessage('Login failed. Please check your login name and password.');
+//         }
+//     };
+
+//     return (
+//         <Box className="login-register-container">
+//             <Typography variant="h4">Login</Typography>
+//             <form onSubmit={handleLogin}>
+//                 <TextField
+//                     label="Login Name"
+//                     variant="outlined"
+//                     value={loginName}
+//                     onChange={(e) => setLoginName(e.target.value)}
+//                     required
+//                 />
+//                 <TextField
+//                     label="Password"
+//                     type="password"
+//                     variant="outlined"
+//                     value={password}
+//                     onChange={(e) => setPassword(e.target.value)}
+//                     required
+//                 />
+//                 <Button type="submit" variant="contained" color="primary">Login</Button>
+//             </form>
+//             {errorMessage && <Typography color="error">{errorMessage}</Typography>}
+//         </Box>
+//     );
+// };
+
+// export default LoginRegister;
+
+
+
+
+
 import React, { useState } from 'react';
-import { Button, TextField, Typography, Box } from '@mui/material';
+import { Button, TextField, Typography, Box, Snackbar } from '@mui/material';
 import axios from 'axios';
 import './LoginRegister.css';
 
 const LoginRegister = ({ onLogin }) => {
     const [loginName, setLoginName] = useState('');
-    const [password, setPassword] = useState('weak'); // Default to "weak" for already registered users
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [location, setLocation] = useState('');
+    const [occupation, setOccupation] = useState('');
+    const [description, setDescription] = useState('');
+    const [tab, setTab] = useState('signIn');
     const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
 
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            // Use "weak" password for already registered users
             const response = await axios.post('/admin/login', { login_name: loginName, password });
-            onLogin(response.data); // Notify parent component of successful login
+            onLogin(response.data);
         } catch (error) {
             setErrorMessage('Login failed. Please check your login name and password.');
         }
     };
 
+    const handleSignUp = async (e) => {
+        e.preventDefault();
+        if (password !== confirmPassword) {
+            setErrorMessage("Passwords do not match.");
+            return;
+        }
+        
+        try {
+            await axios.post('/user', {
+                first_name: firstName,
+                last_name: lastName,
+                location,
+                occupation,
+                description,
+                login_name: loginName,
+                password,
+            });
+            setSuccessMessage("Successfully registered. Please login.");
+            setTab("signIn");
+            clearFormFields();
+        } catch (error) {
+            setErrorMessage("Registration failed. Please check your input.");
+        }
+    };
+
+    const clearFormFields = () => {
+        setFirstName('');
+        setLastName('');
+        setLocation('');
+        setOccupation('');
+        setDescription('');
+        setLoginName('');
+        setPassword('');
+        setConfirmPassword('');
+    };
+
     return (
         <Box className="login-register-container">
-            <Typography variant="h4">Login</Typography>
-            <form onSubmit={handleLogin}>
-                <TextField
-                    label="Login Name"
-                    variant="outlined"
-                    value={loginName}
-                    onChange={(e) => setLoginName(e.target.value)}
-                    required
-                />
-                <TextField
-                    label="Password"
-                    type="password"
-                    variant="outlined"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <Button type="submit" variant="contained" color="primary">Login</Button>
-            </form>
-            {errorMessage && <Typography color="error">{errorMessage}</Typography>}
+            <Snackbar open={!!errorMessage} autoHideDuration={6000} onClose={() => setErrorMessage('')} message={errorMessage} />
+            <Snackbar open={!!successMessage} autoHideDuration={6000} onClose={() => setSuccessMessage('')} message={successMessage} />
+
+            {tab === "signIn" ? (
+                <>
+                    <Typography variant="h4">Login</Typography>
+                    <form onSubmit={handleLogin}>
+                        <TextField label="Login Name" variant="outlined" value={loginName} onChange={(e) => setLoginName(e.target.value)} required />
+                        <TextField label="Password" type="password" variant="outlined" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                        <Button type="submit" variant="contained" color="primary">Login</Button>
+                    </form>
+                    <Typography>
+                        Don't have an account? <button onClick={() => setTab("signUp")}>Sign Up</button>
+                    </Typography>
+                </>
+            ) : (
+                <>
+                    <Typography variant="h4">Register</Typography>
+                    <form onSubmit={handleSignUp}>
+                        <TextField label="First Name" variant="outlined" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+                        <TextField label="Last Name" variant="outlined" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+                        <TextField label="Location" variant="outlined" value={location} onChange={(e) => setLocation(e.target.value)} />
+                        <TextField label="Occupation" variant="outlined" value={occupation} onChange={(e) => setOccupation(e.target.value)} />
+                        <TextField label="Description" variant="outlined" value={description} onChange={(e) => setDescription(e.target.value)} multiline rows={3} />
+                        <TextField label="Login Name" variant="outlined" value={loginName} onChange={(e) => setLoginName(e.target.value)} required />
+                        <TextField label="Password" type="password" variant="outlined" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                        <TextField label="Confirm Password" type="password" variant="outlined" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                        <Button type="submit" variant="contained" color="primary">Register Me</Button>
+                    </form>
+                    <Typography>
+                        Already have an account? <button onClick={() => setTab("signIn")}>Sign In</button>
+                    </Typography>
+                </>
+            )}
         </Box>
     );
 };
