@@ -256,24 +256,60 @@ const isAuthenticated = (req, res, next) => {
   next();
 };
 
+
+//User Registration
+app.post("/user", async (request, response) => {
+  const { login_name, password, first_name, last_name, location, description, occupation } = request.body;
+
+  // Check that required fields are provided
+  if (!login_name || !password || !first_name || !last_name) {
+    return response.status(400).send("Required fields are missing.");
+  }
+
+  try {
+    // Ensure that the login_name is unique
+    const existingUser = await User.findOne({ login_name });
+    if (existingUser) {
+      return response.status(400).send("Login name already exists.");
+    }
+
+    // Create a new user and save to the database
+    const newUser = new User({
+      login_name,
+      password,       // Store plain text password (as required initially)
+      first_name,
+      last_name,
+      location,
+      description,
+      occupation,
+    });
+    await newUser.save();
+
+    response.status(201).send("User registered successfully");
+  } catch (error) {
+    console.error("Error during user registration:", error);
+    response.status(500).send("Internal Server Error");
+  }
+});
+
+
 // Admin Login Endpoint
 
 app.post("/admin/login", async (request, response) => {
-  const { login_name } = request.body;
+  const { login_name, password } = request.body;
 
-  if (!login_name) {
-    return response.status(400).send("Login name is required");
+  if (!login_name || !password) {
+    return response.status(400).send("Login name and password are required.");
   }
 
   try {
     const user = await User.findOne({ login_name });
-
-    if (!user) {
-      return response.status(400).send("Invalid login name");
+    if (!user || user.password !== password) {
+      return response.status(400).send("Invalid login credentials.");
     }
 
     // Store user info in session
-    request.session.userId = user._id; // or any other user info needed
+    request.session.userId = user._id;
     response.status(200).send({
       _id: user._id,
       first_name: user.first_name,
