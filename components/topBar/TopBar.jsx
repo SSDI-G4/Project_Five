@@ -153,14 +153,14 @@
 
 
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { AppBar, Toolbar, Typography, Button } from '@mui/material';
 import { Box } from '@mui/system';
 import axios from 'axios';
 
 const TopBar = ({ user, onLogout }) => {
-
-  const [version, setVersion] = useState(null); // State to store the fetched version
+const uploadInput = useRef(null);
+const [version, setVersion] = useState(null); // State to store the fetched version
 
   // Fetch the app version when the component mounts
   useEffect(() => {
@@ -177,6 +177,23 @@ const TopBar = ({ user, onLogout }) => {
   const handleLogout = () => {
     // Call the logout handler passed from parent component
     onLogout();
+  };
+
+  const handleUploadButtonClicked = async (e) => {
+    e.preventDefault();
+    if (uploadInput.current.files.length > 0) {
+      const domForm = new FormData();
+      domForm.append('uploadedphoto', uploadInput.current.files[0]);
+
+      try {
+        const response = await axios.post('/photos/new', domForm);
+        console.log(response);
+      } catch (err) {
+        console.error(`POST ERR: ${err}`);
+      }
+    } else {
+      console.log("No file selected.");
+    }
   };
 
   return (
@@ -201,6 +218,15 @@ const TopBar = ({ user, onLogout }) => {
             </Typography>
           )}
         </Box>
+              <input
+        type="file"
+        accept="image/*"
+        ref={uploadInput}
+      />
+      <Button variant="contained" onClick={handleUploadButtonClicked}>
+        Upload Photo
+      </Button>
+
         {user ? (
           <>
             <Typography variant="h6" style={{ marginRight: '20px' }}>
@@ -216,6 +242,5 @@ const TopBar = ({ user, onLogout }) => {
       </Toolbar>
     </AppBar>
   );
-};
 
 export default TopBar;

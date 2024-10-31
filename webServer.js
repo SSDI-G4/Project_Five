@@ -42,11 +42,16 @@ const app = express();
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
 // Load the Mongoose schema for User, Photo, and SchemaInfo
 const User = require("./schema/user.js");
 const Photo = require("./schema/photo.js");
 const SchemaInfo = require("./schema/schemaInfo.js");
+
+const storage = multer.memoryStorage(); // Store files in memory temporarily
+const processFormBody = multer({ storage }).single('uploadedphoto'); // Expect a single file with the field name 'uploadedphoto'
 
 // XXX - Your submission should work without this line. Comment out or delete
 // this line for tests and before submission!
@@ -143,6 +148,48 @@ app.get("/test/:p1", function (request, response) {
     // status.
     response.status(400).send("Bad param " + param);
   }
+});
+
+
+app.post('/photos/new', processFormBody, async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  const { originalname, mimetype, buffer } = req.file;
+
+  // Basic validation
+  if (!['image/jpeg', 'image/png'].includes(mimetype)) {
+    return res.status(400).json({ error: 'Unsupported file type' });
+  }
+
+  // Create a unique filename
+  const timestamp = new Date().valueOf();
+  const filename = 'U' + String(timestamp) + path.extname(originalname);
+
+  // Write the file to the "images" directory
+  fs.writeFile(path.join(imagesDir, filename), buffer, async (err) => {
+    if (err) {
+      console.error('Error writing file:', err);
+      return res.status(500).json({ error: 'Error saving file' });
+    }
+
+    // Create a new Photo object in the database
+    const newPhoto = new Photo({
+      filename: filename,
+      user_id: req.session.userId, // Assume userId is stored in the session
+      createdAt: new Date()
+    });
+
+    try {
+      await newPhoto.save();
+      console.log('Photo uploaded and saved to database:', filename);
+      return res.status(201).json({ message: 'Photo uploaded successfully', filename });
+    } catch (dbError) {
+      console.error('Error saving photo to database:', dbError);
+      return res.status(500).json({ error: 'Error saving photo to database' });
+    }
+  });
 });
 
 /**
