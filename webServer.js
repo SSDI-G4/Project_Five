@@ -189,6 +189,9 @@ app.get("/user/:id", async function (request, response) {
  */
 app.get("/photosOfUser/:id", function (request, response) {
   const id = request.params.id;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return response.status(400).send("Invalid ID format");
+  }
   Photo.aggregate([
     { $match:
           {user_id: {$eq: new mongoose.Types.ObjectId(id)}}
@@ -354,7 +357,7 @@ app.post("/commentsOfPhoto/:photo_id", isAuthenticated, async (request, response
       user_id: request.session.userId, // Assuming userId is stored in the session
       comment: comment,
       date_time: new Date() // Set the current date and time
-    };
+    };    
 
     // Find the photo and update its comments
     const photo = await Photo.findByIdAndUpdate(
@@ -379,9 +382,6 @@ app.post("/commentsOfPhoto/:photo_id", isAuthenticated, async (request, response
     response.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-
-
 
 
 // Apply the middleware to all routes that need protection
