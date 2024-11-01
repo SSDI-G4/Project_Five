@@ -277,7 +277,7 @@ app.post("/commentsOfPhoto/:photo_id", async (request, response) => {
   const { comment } = request.body;
 
   // Validate the input for non-empty comments
-  if (!comment || comment.length === 0 || comment.trim().length===0) {
+  if (!comment || comment.length === 0 || comment.trim().length === 0) {
     return response.status(400).json({ error: "Comment cannot be empty." });
   }
 
@@ -287,7 +287,7 @@ app.post("/commentsOfPhoto/:photo_id", async (request, response) => {
       user_id: request.session.userId, // Assuming userId is stored in the session
       comment: comment,
       date_time: new Date() // Set the current date and time
-    };    
+    };
 
     // Find the photo and update its comments
     const photo = await Photo.findByIdAndUpdate(
@@ -306,12 +306,13 @@ app.post("/commentsOfPhoto/:photo_id", async (request, response) => {
 
     // Get the newly added comment (last item in comments array) with populated user details
     const addedComment = photo.comments[photo.comments.length - 1];
-    response.status(201).json(addedComment); // Send back the created comment with user details
+    return response.status(201).json(addedComment); // Send back the created comment with user details
   } catch (error) {
     console.error("Error adding comment:", error);
-    response.status(500).json({ error: "Internal Server Error" });
+    return response.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 /**
  * URL /admin/login - Returns user object on successful login

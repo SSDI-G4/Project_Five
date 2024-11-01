@@ -265,7 +265,7 @@ import { Button, TextField, Typography, Box, Snackbar } from '@mui/material';
 import axios from 'axios';
 import './LoginRegister.css';
 
-const LoginRegister = ({ onLogin }) => {
+function LoginRegister({ onLogin }) {
     const [loginName, setLoginName] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -278,6 +278,16 @@ const LoginRegister = ({ onLogin }) => {
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
+    const clearFormFields = () => {
+        setFirstName('');
+        setLastName('');
+        setLocation('');
+        setOccupation('');
+        setDescription('');
+        setLoginName('');
+        setPassword('');
+        setConfirmPassword('');
+    };
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
@@ -313,16 +323,7 @@ const LoginRegister = ({ onLogin }) => {
         }
     };
 
-    const clearFormFields = () => {
-        setFirstName('');
-        setLastName('');
-        setLocation('');
-        setOccupation('');
-        setDescription('');
-        setLoginName('');
-        setPassword('');
-        setConfirmPassword('');
-    };
+    
 
     return (
         <Box className="login-register-container">
@@ -338,7 +339,7 @@ const LoginRegister = ({ onLogin }) => {
                         <Button type="submit" variant="contained" color="primary">Login</Button>
                     </form>
                     <Typography>
-                        Don't have an account? <button onClick={() => setTab("signUp")}>Sign Up</button>
+                    Don&apos;t have an account? <button onClick={() => setTab("signUp")}>Sign Up</button>
                     </Typography>
                 </>
             ) : (
@@ -362,6 +363,6 @@ const LoginRegister = ({ onLogin }) => {
             )}
         </Box>
     );
-};
+}
 
 export default LoginRegister;
