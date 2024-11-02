@@ -263,7 +263,7 @@
 import React, { useState } from 'react';
 import { Button, TextField, Typography, Box, Snackbar } from '@mui/material';
 import axios from 'axios';
-import './LoginRegister.css';
+import './loginRegister.css';
 
 function LoginRegister({ onLogin }) {
     const [loginName, setLoginName] = useState('');

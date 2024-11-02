@@ -43,9 +43,13 @@ const session = require("express-session");
 const bodyParser = require("body-parser");
 const multer = require("multer");
 
-const processFormBody = multer({storage: multer.memoryStorage()}).single('uploadedphoto');
+const processFormBody = multer({ storage: multer.memoryStorage() }).single(
+  "uploadedphoto"
+);
 
-app.use(session({secret: "secretKey", resave: false, saveUninitialized: false}));
+app.use(
+  session({ secret: "secretKey", resave: false, saveUninitialized: false })
+);
 app.use(bodyParser.json());
 
 // Load the Mongoose schema for User, Photo, and SchemaInfo
@@ -63,14 +67,14 @@ mongoose.connect("mongodb://127.0.0.1/project6", {
 // (http://expressjs.com/en/starter/static-files.html) do all the work for us.
 app.use(express.static(__dirname));
 
-function getSessionUserID(request){
+function getSessionUserID(request) {
   return request.session.user_id;
   //return session.user._id;
 }
 
-function hasNoUserSession(request, response){
+function hasNoUserSession(request, response) {
   //return false;
-  if (!getSessionUserID(request)){
+  if (!getSessionUserID(request)) {
     response.status(401).send();
     return true;
   }
@@ -89,7 +93,7 @@ app.get("/", function (request, response) {
  * Use express to handle argument passing in the URL. This .get will cause
  * express to accept URLs with /test/<something> and return the something in
  * request.params.p1.
- * 
+ *
  * If implement the get as follows:
  * /test        - Returns the SchemaInfo object of the database in JSON format.
  *                This is good for testing connectivity with MongoDB.
@@ -193,35 +197,34 @@ app.post("/user", function (request, response) {
     return;
   }
 
-  User.exists({login_name: login_name}, function (err, returnValue){
-    if (err){
+  User.exists({ login_name: login_name }, function (err, returnValue) {
+    if (err) {
       console.error("Error in /user", err);
       response.status(500).send();
     } else if (returnValue) {
-        console.error("Error in /user", returnValue);
-        response.status(400).send();
-      } else {
-        User.create(
-            {
-              _id: new mongoose.Types.ObjectId(),
-              first_name: first_name,
-              last_name: last_name,
-              location: location,
-              description: description,
-              occupation: occupation,
-              login_name: login_name,
-              password: password
-            })
-            .then((user) => {
-              request.session.user_id = user._id;
-              session.user_id = user._id;
-              response.end(JSON.stringify(user));
-            })
-            .catch(err1 => {
-              console.error("Error in /user", err1);
-              response.status(500).send();
-            });
-      }
+      console.error("Error in /user", returnValue);
+      response.status(400).send();
+    } else {
+      User.create({
+        _id: new mongoose.Types.ObjectId(),
+        first_name: first_name,
+        last_name: last_name,
+        location: location,
+        description: description,
+        occupation: occupation,
+        login_name: login_name,
+        password: password,
+      })
+        .then((user) => {
+          request.session.user_id = user._id;
+          session.user_id = user._id;
+          response.end(JSON.stringify(user));
+        })
+        .catch((err1) => {
+          console.error("Error in /user", err1);
+          response.status(500).send();
+        });
+    }
   });
 });
 
@@ -243,28 +246,27 @@ app.post("/photos/new", function (request, response) {
       return;
     }
     const timestamp = new Date().valueOf();
-    const filename = 'U' +  String(timestamp) + request.file.originalname;
+    const filename = "U" + String(timestamp) + request.file.originalname;
     fs.writeFile("./images/" + filename, request.file.buffer, function (err1) {
       if (err1) {
         console.error("Error in /photos/new", err1);
         response.status(400).send("error writing photo");
         return;
       }
-      Photo.create(
-          {
-            _id: new mongoose.Types.ObjectId(),
-            file_name: filename,
-            date_time: new Date(),
-            user_id: new mongoose.Types.ObjectId(user_id),
-            comment: []
-          })
-          .then(() => {
-            response.end();
-          })
-          .catch(err2 => {
-            console.error("Error in /photos/new", err2);
-            response.status(500).send(JSON.stringify(err2));
-          });
+      Photo.create({
+        _id: new mongoose.Types.ObjectId(),
+        file_name: filename,
+        date_time: new Date(),
+        user_id: new mongoose.Types.ObjectId(user_id),
+        comment: [],
+      })
+        .then(() => {
+          response.end();
+        })
+        .catch((err2) => {
+          console.error("Error in /photos/new", err2);
+          response.status(500).send(JSON.stringify(err2));
+        });
     });
   });
 });
@@ -272,6 +274,88 @@ app.post("/photos/new", function (request, response) {
 /**
  * URL /commentsOfPhoto/:photo_id - adds a new comment on photo for the current user
  */
+// app.post("/commentsOfPhoto/:photo_id", async (request, response) => {
+//   const photoId = request.params.photo_id;
+//   const { comment } = request.body;
+
+//   // Validate the input for non-empty comments
+//   if (!comment || comment.length === 0 || comment.trim().length === 0) {
+//     return response.status(400).json({ error: "Comment cannot be empty." });
+//   }
+
+//   try {
+//     // Create the new comment object
+//     const newComment = {
+//       user_id: request.session.userId, // Assuming userId is stored in the session
+//       comment: comment,
+//       date_time: new Date() // Set the current date and time
+//     };
+
+//     // Find the photo and update its comments
+//     const photo = await Photo.findByIdAndUpdate(
+//       photoId,
+//       { $push: { comments: newComment } },
+//       { new: true } // Return the updated document
+//     ).populate({
+//       path: 'comments.user_id',
+//       select: '_id first_name last_name' // Populate user details with name
+//     });
+
+//     // Check if the photo exists
+//     if (!photo) {
+//       return response.status(404).json({ error: "Photo not found" });
+//     }
+
+//     // Get the newly added comment (last item in comments array) with populated user details
+//     const addedComment = photo.comments[photo.comments.length - 1];
+//     return response.status(201).json(addedComment); // Send back the created comment with user details
+//   } catch (error) {
+//     console.error("Error adding comment:", error);
+//     return response.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
+
+// app.post("/commentsOfPhoto/:photo_id", function (request, response) {
+//   if (hasNoUserSession(request, response)) return;
+//   const id = request.params.photo_id || "";
+//   const user_id = getSessionUserID(request) || "";
+//   const comment = request.body.comment || "";
+//   if (id === "") {
+//     response.status(400).send("id required");
+//     return;
+//   }
+//   if (user_id === "") {
+//     response.status(400).send("user_id required");
+//     return;
+//   }
+//   if (comment === "") {
+//     response.status(400).send("comment required");
+//     return;
+//   }
+//   Photo.updateOne(
+//     { _id: new mongoose.Types.ObjectId(id) },
+//     {
+//       $push: {
+//         comments: {
+//           comment: comment,
+//           date_time: new Date(),
+//           user_id: new mongoose.Types.ObjectId(user_id),
+//           _id: new mongoose.Types.ObjectId(),
+//         },
+//       },
+//     },
+//     function (err) {
+//       if (err) {
+//         // Query returned an error. We pass it back to the browser with an
+//         // Internal Service Error (500) error code.
+//         console.error("Error in /commentsOfPhoto/:photo_id", err);
+//         response.status(500).send(JSON.stringify(err));
+//         return;
+//       }
+//       response.end();
+//     }
+//   );
+// });
 app.post("/commentsOfPhoto/:photo_id", async (request, response) => {
   const photoId = request.params.photo_id;
   const { comment } = request.body;
@@ -286,7 +370,7 @@ app.post("/commentsOfPhoto/:photo_id", async (request, response) => {
     const newComment = {
       user_id: request.session.userId, // Assuming userId is stored in the session
       comment: comment,
-      date_time: new Date() // Set the current date and time
+      date_time: new Date(), // Set the current date and time
     };
 
     // Find the photo and update its comments
@@ -295,8 +379,8 @@ app.post("/commentsOfPhoto/:photo_id", async (request, response) => {
       { $push: { comments: newComment } },
       { new: true } // Return the updated document
     ).populate({
-      path: 'comments.user_id',
-      select: '_id first_name last_name' // Populate user details with name
+      path: "comments.user_id",
+      select: "_id first_name last_name", // Populate user details with name
     });
 
     // Check if the photo exists
@@ -313,7 +397,6 @@ app.post("/commentsOfPhoto/:photo_id", async (request, response) => {
   }
 });
 
-
 /**
  * URL /admin/login - Returns user object on successful login
  */
@@ -321,30 +404,33 @@ app.post("/admin/login", function (request, response) {
   const login_name = request.body.login_name || "";
   const password = request.body.password || "";
   User.find(
-      {
-        login_name: login_name,
-        password: password
-      }, {__v: 0}, function (err, user) {
-    if (err) {
-      // Query returned an error. We pass it back to the browser with an
-      // Internal Service Error (500) error code.
-      console.error("Error in /admin/login", err);
-      response.status(500).send(JSON.stringify(err));
-      return;
+    {
+      login_name: login_name,
+      password: password,
+    },
+    { __v: 0 },
+    function (err, user) {
+      if (err) {
+        // Query returned an error. We pass it back to the browser with an
+        // Internal Service Error (500) error code.
+        console.error("Error in /admin/login", err);
+        response.status(500).send(JSON.stringify(err));
+        return;
+      }
+      if (user.length === 0) {
+        // Query didn't return an error but didn't find the user object -
+        // This is also an internal error return.
+        response.status(400).send();
+        return;
+      }
+      request.session.user_id = user[0]._id;
+      session.user_id = user[0]._id;
+      //session.user = user;
+      //response.cookie('user',user);
+      // We got the object - return it in JSON format.
+      response.end(JSON.stringify(user[0]));
     }
-    if (user.length === 0) {
-      // Query didn't return an error but didn't find the user object -
-      // This is also an internal error return.
-      response.status(400).send();
-      return;
-    }
-    request.session.user_id = user[0]._id;
-    session.user_id = user[0]._id;
-    //session.user = user;
-    //response.cookie('user',user);
-    // We got the object - return it in JSON format.
-    response.end(JSON.stringify(user[0]));
-  });
+  );
 });
 
 /**
@@ -364,7 +450,7 @@ app.post("/admin/logout", function (request, response) {
  */
 app.get("/user/list", function (request, response) {
   if (hasNoUserSession(request, response)) return;
-  User.find({}, {_id: 1, first_name: 1, last_name: 1}, function (err, users) {
+  User.find({}, { _id: 1, first_name: 1, last_name: 1 }, function (err, users) {
     if (err) {
       // Query returned an error. We pass it back to the browser with an
       // Internal Service Error (500) error code.
@@ -389,30 +475,27 @@ app.get("/user/list", function (request, response) {
 app.get("/user/:id", function (request, response) {
   if (hasNoUserSession(request, response)) return;
   const id = request.params.id;
-  User.findById(id,{__v:0, login_name:0, password: 0})
-      .then((user) => {
-        if (user === null) {
-          // Query didn't return an error but didn't find the SchemaInfo object -
-          // This is also an internal error return.
-          console.error("User not found - /user/:id", id);
-          response.status(400).send();
-        }
-        response.end(JSON.stringify(user));
-      })
-      .catch( (err) => {
-        // Query returned an error. We pass it back to the browser with an
-        // Internal Service Error (500) error code.
-        console.error("Error in /user/:id", err.reason);
-        if (err.reason.toString().startsWith("BSONTypeError:")) {
-          response.status(400)
-              .send();
-        }
-        else {
-          response.status(500)
-              .send();
-        }
-        return null;
-      });
+  User.findById(id, { __v: 0, login_name: 0, password: 0 })
+    .then((user) => {
+      if (user === null) {
+        // Query didn't return an error but didn't find the SchemaInfo object -
+        // This is also an internal error return.
+        console.error("User not found - /user/:id", id);
+        response.status(400).send();
+      }
+      response.end(JSON.stringify(user));
+    })
+    .catch((err) => {
+      // Query returned an error. We pass it back to the browser with an
+      // Internal Service Error (500) error code.
+      console.error("Error in /user/:id", err.reason);
+      if (err.reason.toString().startsWith("BSONTypeError:")) {
+        response.status(400).send();
+      } else {
+        response.status(500).send();
+      }
+      return null;
+    });
 });
 
 /**
@@ -421,58 +504,85 @@ app.get("/user/:id", function (request, response) {
 app.get("/photosOfUser/:id", function (request, response) {
   if (hasNoUserSession(request, response)) return;
   const id = request.params.id;
-  User.findById(id,{__v:0, login_name:0, password: 0})
-      .then((user) => {
-        if (user === null) {
-          // Query didn't return an error but didn't find the SchemaInfo object -
-          // This is also an internal error return.
-          console.error("User not found - /user/:id", id);
-          response.status(400).send();
-        }
-        Photo.aggregate([
-          { $match: {user_id: {$eq: new mongoose.Types.ObjectId(id)}}},
-          { $addFields: { comments: {$ifNull: ["$comments", []]}}},
-          { $lookup: { from: "users", localField: "comments.user_id", foreignField: "_id", as: "users"}},
-          { $addFields: { comments: { $map: { input: "$comments",
-in: { $mergeObjects: ["$$this",
-                      { user: { $arrayElemAt: ["$users", { $indexOfArray: ["$users._id", "$$this.user_id"] }] } }
-                    ] } } } } },
-          { $project: { users: 0,
-__v: 0,
-"comments.__v": 0,
-"comments.user_id": 0,
-              "comments.user.location": 0,
-"comments.user.description": 0,
-"comments.user.occupation": 0,
-              "comments.user.login_name": 0,
-"comments.user.password": 0,
-"comments.user.__v": 0 } }
-        ])
-            .then((photos) => {
-              if (photos.length === 0 && typeof (photos) === "object") {
-                photos = [];
-              }
-              // We got the object - return it in JSON format.
-              response.end(JSON.stringify(photos));
-            }).catch((err) => {
-              console.error("Error in /photosOfUser/:id", err);
-              response.status(500).send(JSON.stringify(err));
-            });
-      })
-      .catch( (err) => {
-        // Query returned an error. We pass it back to the browser with an
-        // Internal Service Error (500) error code.
-        console.error("Error in /user/:id", err.reason);
-        if (err.reason.toString().startsWith("BSONTypeError:")) {
-          response.status(400)
-              .send();
-        }
-        else {
-          response.status(500)
-              .send();
-        }
-        return null;
-      });
+  User.findById(id, { __v: 0, login_name: 0, password: 0 })
+    .then((user) => {
+      if (user === null) {
+        // Query didn't return an error but didn't find the SchemaInfo object -
+        // This is also an internal error return.
+        console.error("User not found - /user/:id", id);
+        response.status(400).send();
+      }
+      Photo.aggregate([
+        { $match: { user_id: { $eq: new mongoose.Types.ObjectId(id) } } },
+        { $addFields: { comments: { $ifNull: ["$comments", []] } } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "comments.user_id",
+            foreignField: "_id",
+            as: "users",
+          },
+        },
+        {
+          $addFields: {
+            comments: {
+              $map: {
+                input: "$comments",
+                in: {
+                  $mergeObjects: [
+                    "$$this",
+                    {
+                      user: {
+                        $arrayElemAt: [
+                          "$users",
+                          { $indexOfArray: ["$users._id", "$$this.user_id"] },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            users: 0,
+            __v: 0,
+            "comments.__v": 0,
+            "comments.user_id": 0,
+            "comments.user.location": 0,
+            "comments.user.description": 0,
+            "comments.user.occupation": 0,
+            "comments.user.login_name": 0,
+            "comments.user.password": 0,
+            "comments.user.__v": 0,
+          },
+        },
+      ])
+        .then((photos) => {
+          if (photos.length === 0 && typeof photos === "object") {
+            photos = [];
+          }
+          // We got the object - return it in JSON format.
+          response.end(JSON.stringify(photos));
+        })
+        .catch((err) => {
+          console.error("Error in /photosOfUser/:id", err);
+          response.status(500).send(JSON.stringify(err));
+        });
+    })
+    .catch((err) => {
+      // Query returned an error. We pass it back to the browser with an
+      // Internal Service Error (500) error code.
+      console.error("Error in /user/:id", err.reason);
+      if (err.reason.toString().startsWith("BSONTypeError:")) {
+        response.status(400).send();
+      } else {
+        response.status(500).send();
+      }
+      return null;
+    });
 });
 
 const server = app.listen(3000, function () {
