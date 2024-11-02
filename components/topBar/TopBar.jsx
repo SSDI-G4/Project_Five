@@ -1,101 +1,102 @@
-import React from 'react';
-import {
-  AppBar, Toolbar, Typography, Box
-} from '@mui/material';
-import { withRouter } from 'react-router-dom';
-import './TopBar.css';
+import React, { useEffect, useState, useRef } from 'react';
+import { AppBar, Toolbar, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Box } from '@mui/system';
 import axios from 'axios';
 
+function TopBar({ user, onLogout }) {
+  const [version, setVersion] = useState(null);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false); // State for dialog visibility
+  const uploadInputRef = useRef(null);
 
-class TopBar extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      user: null,
-      version: null
-    };
-  }
-
-  componentDidMount() {
+  // Fetch the app version when the component mounts
+  useEffect(() => {
     axios.get('/test/info')
       .then((response) => {
-        const version = response.data.version;  
-        this.setState({ version });
+        const appVersion = response.data.version;
+        setVersion(appVersion);
       })
       .catch((error) => {
         console.error('Error fetching version:', error);
       });
+  }, []);
 
-    this.loadUserDetails();
-  }
+  const handleLogout = () => {
+    onLogout();
+  };
 
-  componentDidUpdate(prevProps) {
-    const { location } = this.props;
+  const handleUploadButtonClick = () => {
+    setUploadDialogOpen(true); // Open the upload dialog
+  };
 
-    if (location !== prevProps.location) {
-      this.loadUserDetails();
+  const handleNewPhoto = (e) => {
+    e.preventDefault();
+    const uploadInput = uploadInputRef.current;
+    if (uploadInput && uploadInput.files.length > 0) {
+      const domForm = new FormData();
+      domForm.append('uploadedphoto', uploadInput.files[0]);
+      axios.post("/photos/new", domForm)
+        .then(() => {
+          console.log("Photo uploaded successfully");
+          setUploadDialogOpen(false); // Close dialog after successful upload
+        })
+        .catch(error => {
+          console.error('Error uploading photo:', error);
+        });
     }
-  }
+  };
 
-  loadUserDetails = async () => {
-    const { location } = this.props;
-    const userId = location.pathname.split('/')[2];
+  const handleCloseDialog = () => {
+    setUploadDialogOpen(false); // Close dialog without uploading
+  };
 
-    if (userId) {
-        try {
-            
-            const response = await axios.get(`/user/${userId}`);
-            const user = response.data; 
-            this.setState({ user });
-        } catch (error) {
-            console.error('Error fetching user:', error); 
-        }
-    } else {
-        this.setState({ user: null }); 
-    }
-};
-
-
-  render() {
-    const { location } = this.props;
-    const { user, version } = this.state;
-    let title = '';
-
-    if (location) {
-      if (location.pathname.startsWith('/photos/')) {
-        title = user ? `Photos of ${user.first_name} ${user.last_name}` : 'Loading...';
-      } else if (location.pathname.startsWith('/users/')) {
-        title = user ? `Details of ${user.first_name} ${user.last_name}` : 'Loading...';
-      } else {
-        title = 'PhotoShare App'; 
-      }
-    }
-
-    return (
-      <AppBar className="topbar-appBar" position="fixed">
-        <Toolbar>
-          <Typography variant="h6" color="inherit">
-            Group 4
-          </Typography>
-          <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', flexGrow: 1 }}>
+  return (
+    <AppBar position="fixed">
+      <Toolbar>
+        <Typography variant="h6" color="inherit">
+          Group 4
+        </Typography>
+        <Box sx={{ flexGrow: 1 }} />
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', flexGrow: 1 }}>
           <Typography variant="h6" color="inherit" textAlign={'center'}>
             App Version:
           </Typography>
           <Box sx={{ width: '10px' }} />
-          {version && (
+          {version ? (
             <Typography variant="body1" color="inherit">
               {version}
             </Typography>
+          ) : (
+            <Typography variant="body1" color="inherit">
+              Loading...
+            </Typography>
           )}
-          </Box>
-          <Typography variant="h6" color="inherit">
-            {title}
+        </Box>
+        {user ? (
+          <>
+            <Button style={{ marginRight: '20px' }} color="inherit" onClick={handleUploadButtonClick}>Upload Photo</Button>
+            <Dialog open={uploadDialogOpen} onClose={handleCloseDialog}>
+              <DialogTitle>Upload New Photo</DialogTitle>
+              <DialogContent>
+                <input type="file" accept="image/*" ref={uploadInputRef} />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleCloseDialog} color="secondary">Cancel</Button>
+                <Button onClick={handleNewPhoto} color="primary">Submit Photo</Button>
+              </DialogActions>
+            </Dialog>
+            <Typography variant="h6" style={{ marginRight: '20px' }}>
+              Hi, {user.first_name}!
+            </Typography>
+            <Button color="inherit" onClick={handleLogout}>Logout</Button>
+          </>
+        ) : (
+          <Typography variant="h6">
+            Please login
           </Typography>
-        </Toolbar>
-      </AppBar>
-    );
-  }
+        )}
+      </Toolbar>
+    </AppBar>
+  );
 }
 
-export default withRouter(TopBar);
+export default TopBar;
