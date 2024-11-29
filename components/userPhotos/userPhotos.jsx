@@ -50,6 +50,19 @@ function UserPhotos(props) {
       .catch((err) => console.log(err));
   };
 
+  const onLikeClick = (photo) => {
+    axios
+      .post("http://localhost:3000/photos/like/" + photo._id)
+      .then((res) => {
+        setPhotosData((prev) => {
+          const newPhotosData = [...prev];
+          const photoIndex = newPhotosData.findIndex((photoData) => photoData._id === photo._id);
+          newPhotosData[photoIndex].liked_by = res.data;
+          return newPhotosData;
+        });
+      })
+      .catch((err) => console.log(err));
+  };
 
   const location = useLocation();
 
@@ -99,6 +112,13 @@ function UserPhotos(props) {
               <div id={photo?.file_name}>
                 <img src={`../../images/${photo?.file_name}`} className="main-image" />
               </div>
+            </Box>
+            <Box display="flex" flexDirection="row" alignItems="center" gap={1} marginTop={2}>
+              <ChatBubbleOutline /> <Typography sx={{ marginRight: 3 }}>{photo?.comments?.length}</Typography>
+              <Box onClick={() => onLikeClick(photo)} sx={{ cursor: "pointer" }}>
+                {photo?.liked_by?.includes(props.userId) ? <FavoriteIcon color="error" /> : <FavoriteBorderIcon />}
+              </Box>{" "}
+              <Typography>{photo?.liked_by?.length || 0}</Typography>
             </Box>
             <Box padding={2}>
               <Box component="form" noValidate onSubmit={(event) => addComment(event, photo)} marginBottom={5}>
