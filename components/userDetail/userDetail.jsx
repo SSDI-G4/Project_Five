@@ -223,6 +223,11 @@ function UserDetail(props) {
       >
         <ChatBubbleOutlineIcon />
         <Typography sx={{ marginRight: 3 }}>{recentPhoto?.comments?.length}</Typography>
+
+        {/* Like Button */}
+        <FavoriteBorderIcon />
+        <Typography>{recentPhoto?.liked_by?.length || 0}</Typography>
+
       </Box>
     </Box>
   )}
@@ -275,6 +280,10 @@ function UserDetail(props) {
         <ChatBubbleOutlineIcon />
         <Typography sx={{ marginRight: 3 }}>{mostComments?.comments?.length}</Typography>
 
+        {/* Like Button */}
+        <FavoriteBorderIcon />
+        <Typography>{mostComments?.liked_by?.length || 0}</Typography>
+        
       </Box>
     </Box>
   )}
