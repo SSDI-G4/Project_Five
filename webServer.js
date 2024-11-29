@@ -433,6 +433,30 @@ app.get("/photos/most-comments/:id", async function (request, response) {
   }
 });
 
+app.post("/photos/like/:photo_id", async function (request, response) {
+  if (!request.session.user) {
+    response.status(401).send("You are not logged in");
+  } else {
+    try {
+      const photo_id = request.params.photo_id;
+      const photo = await Photo.findById(photo_id);
+      if (!photo) {
+        response.status(400).send("Photo not found");
+        return;
+      } else if (photo.liked_by.includes(request.session.user._id)) {
+        photo.liked_by = photo.liked_by.filter((id) => id.toString() !== request.session.user._id.toString());
+        await photo.save();
+        response.status(200).send(photo.liked_by);
+      } else {
+        photo.liked_by.push(request.session.user._id);
+        await photo.save();
+        response.status(200).send(photo.liked_by);
+      }
+    } catch (error) {
+      response.status(400).send("Invalid id");
+    }
+  }
+});
 
 const server = app.listen(3000, function () {
   const port = server.address().port;
