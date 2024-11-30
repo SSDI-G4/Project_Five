@@ -288,132 +288,115 @@ function UserDetail(props) {
         )}
       </Box> */}
       <Box
-  sx={{
-    width: "100%",
-    borderTop: "1px solid gray",
-    paddingTop: "20px",
-    display: "flex",
-    flexDirection: "column", // Vertical stacking
-    gap: "20px", // Spacing between the items
-    marginTop: "20px",
-  }}
->
-  {recentPhoto && (
-    <Box
-      sx={{
-        width: "100%", // Full width
-        cursor: "pointer",
-      }}
-      onClick={() =>
-        history.push(
-          "/photos/" + props.match.params.userId + "?imageId=" + (recentPhoto?.file_name || "")
-        )
-      }
-    >
-      <Box
         sx={{
           width: "100%",
+          borderTop: "1px solid gray",
+          paddingTop: "20px",
           display: "flex",
-          flexDirection: "column",
+          flexDirection: "column", // Vertical stacking
+          gap: "20px", // Spacing between the items
+          marginTop: "20px",
         }}
       >
-        <Typography>Recent Photo</Typography>
-        <Box
-          sx={{
-            display: "flex",
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "black",
-          }}
-        >
-          <img
-            src={`../../images/${recentPhoto?.file_name}`}
-            alt="recent"
-            className="main-image"
-          />
-        </Box>
-      </Box>
-      <Box
-        display="flex"
-        flexDirection="row"
-        alignItems="center"
-        gap={1}
-        marginTop={2}
-      >
-        <ChatBubbleOutlineIcon />
-        <Typography sx={{ marginRight: 3 }}>{recentPhoto?.comments?.length}</Typography>
+        {recentPhoto && (
+          <Box
+            sx={{
+              width: "100%", // Full width
+              cursor: "pointer",
+            }}
+            onClick={() => history.push("/photos/" + props.match.params.userId + "?imageId=" + (recentPhoto?.file_name || ""))}
+          >
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Typography>Recent Photo</Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "black",
+                }}
+              >
+                <img
+                  src={`../../images/${recentPhoto?.file_name}`}
+                  alt="recent"
+                  className="main-image"
+                />
+              </Box>
+            </Box>
+            <Box display="flex" flexDirection="row" alignItems="center" gap={1} marginTop={2}>
+              <ChatBubbleOutlineIcon />
+              <Typography sx={{ marginRight: 3 }}>{recentPhoto?.comments?.length}</Typography>
 
-        {/* Like Button */}
-        <FavoriteBorderIcon />
-        <Typography>{recentPhoto?.liked_by?.length || 0}</Typography>
+              {/* Like Button */}
+              <FavoriteBorderIcon />
+              <Typography>{recentPhoto?.liked_by?.length || 0}</Typography>
 
-        {/* Favorite Button */}
-        <BookmarkBorderIcon />
-        <Typography>{recentPhoto?.favorited_by?.length || 0}</Typography>
-      </Box>
-    </Box>
-  )}
-  {mostComments && (
-    <Box
-      sx={{
-        width: "100%", // Full width
-        cursor: "pointer",
-      }}
-      onClick={() =>
-        history.push(
-          "/photos/" +
-            props.match.params.userId +
-            "?imageId=" +
-            (mostComments?.file_name || "")
-        )
-      }
-    >
-      <Box
-        sx={{
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <Typography>Most Comments</Typography>
-        <Box
-          sx={{
-            display: "flex",
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "black",
-          }}
-        >
-          <img
-            src={`../../images/${mostComments?.file_name}`}
-            alt="most comments"
-            className="main-image"
-          />
-        </Box>
-      </Box>
-      <Box
-        display="flex"
-        flexDirection="row"
-        alignItems="center"
-        gap={1}
-        marginTop={2}
-      >
-        <ChatBubbleOutlineIcon />
-        <Typography sx={{ marginRight: 3 }}>{mostComments?.comments?.length}</Typography>
+              {/* Favorite Button */}
+              <BookmarkBorderIcon />
+              <Typography>{recentPhoto?.favorited_by?.length || 0}</Typography>
+            </Box>
+          </Box>
+        )}
+        {mostComments && (
+          <Box
+            sx={{
+              width: "100%", // Full width
+              cursor: "pointer",
+            }}
+            onClick={() => history.push("/photos/" + props.match.params.userId + "?imageId=" + (mostComments?.file_name || ""))}
+          >
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Typography>Most Comments</Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "black",
+                }}
+              >
+                <img
+                  src={`../../images/${mostComments?.file_name}`}
+                  alt="most comments"
+                  className="main-image"
+                />
+              </Box>
+            </Box>
+            <Box
+              display="flex"
+              flexDirection="row"
+              alignItems="center"
+              gap={1}
+              marginTop={2}
+            >
+              <ChatBubbleOutlineIcon />
+              <Typography sx={{ marginRight: 3 }}>{mostComments?.comments?.length}</Typography>
 
-        {/* Like Button */}
-        <FavoriteBorderIcon />
-        <Typography>{mostComments?.liked_by?.length || 0}</Typography>
+              {/* Like Button */}
+              <FavoriteBorderIcon />
+              <Typography>{mostComments?.liked_by?.length || 0}</Typography>
 
-        {/* Favorite Button */}
-        <BookmarkBorderIcon />
-        <Typography>{mostComments?.favorited_by?.length || 0}</Typography>
+              {/* Favorite Button */}
+              <BookmarkBorderIcon />
+              <Typography>{mostComments?.favorited_by?.length || 0}</Typography>
+            </Box>
+          </Box>
+        )}
       </Box>
-    </Box>
-  )}
-</Box>
     </Box>
   );
 }
