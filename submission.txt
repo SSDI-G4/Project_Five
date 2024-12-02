@@ -5,16 +5,16 @@ Please fill in this form and submit it with your Project 8.
 Enter no more than 5 user stories that you did for the assignment that you would
 like to be graded on. For each story include the following information:
 
-Story number and name: Extend user profile detail with usage
-Story points: 1
+Story number and name: 1 Extend user profile detail with usage
+Story points: 3
 Brief description to see the story in action: The user detail page should display the most recently uploaded photo and the one with the most comments, each accompanied by a small thumbnail and relevant details (upload date and comment count, respectively). Clicking on these thumbnails should redirect to the previously implemented user photos view, showcasing the selected photo and its comments in full detail.
 
 Story number and name: Photo Like Votes
-Story points: 6
+Story points: 4
 Brief description to see the story in action: Implement a like button for each photo, allowing users to like or unlike the photo, with the button visually changing to reflect the action. Ensure the like count doesn't exceed the total user count and provide a visual cue to indicate if the user has already liked the photo, removing it if they unlike. Display the number of likes next to the button, updating this count instantly when liked or unliked. Sort the user's photos page by like count in descending order, then by timestamp for photos with equal likes, updating the order upon page refresh.
 
 Story number and name: Favorite Lists of Photos for Users
-Story points: 7
+Story points: 6
 Brief description to see the story in action: Logged-in users can mark photos as favorites, creating a personalized list accessible via a dedicated /favorites page. Photos can be unfavorited, and a distinctive button or icon next to each photo allows users to add it to their favorites. Once favorited, this button should be disabled, with a clear indicator showing the photo's favored status. The favorites page displays thumbnails of favorited photos; clicking a thumbnail opens a modal with a larger image and the photo's upload date. Users should have an easy option, like clicking an "x" on the thumbnail, to remove photos from their favorites, ensuring the removal persists even after a page refresh or re-login.
 
 Total Story Points: 13
