@@ -1,102 +1,120 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { AppBar, Toolbar, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
-import { Box } from '@mui/system';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { AppBar, Box, Button, Input, Link, Modal, Toolbar, Typography } from "@mui/material";
+import { useHistory } from "react-router-dom";
+import "./TopBar.css";
+import axios from "axios";
 
-function TopBar({ user, onLogout }) {
-  const [version, setVersion] = useState(null);
-  const [uploadDialogOpen, setUploadDialogOpen] = useState(false); // State for dialog visibility
-  const uploadInputRef = useRef(null);
+/**
+ * Define TopBar, a React componment of project #5
+ */
 
-  // Fetch the app version when the component mounts
+function TopBar(props) {
+  const history = useHistory();
+  const style = {
+    position: "fixed",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    border: "2px solid #000",
+    boxShadow: 24,
+    p: 4,
+  };
+  const [infoData, setInfoData] = useState();
+  const [openModal, setOpenModal] = useState(false);
+  const [file, setFile] = useState();
+  const logout = () => {
+    props.setUser("");
+    props.setUserId("");
+    axios
+      .post("http://localhost:3000/admin/logout")
+      .then((res) => console.log(res))
+      .catch((err) => console.log(`Error + ${err}`));
+  };
   useEffect(() => {
-    axios.get('/test/info')
-      .then((response) => {
-        const appVersion = response.data.version;
-        setVersion(appVersion);
-      })
-      .catch((error) => {
-        console.error('Error fetching version:', error);
-      });
+    axios
+      .get("http://localhost:3000/test/info")
+      .then((res) => setInfoData(res.data))
+      .catch((err) => console.log(`Error + ${err}`));
   }, []);
-
-  const handleLogout = () => {
-    onLogout();
-  };
-
-  const handleUploadButtonClick = () => {
-    setUploadDialogOpen(true); // Open the upload dialog
-  };
-
-  const handleNewPhoto = (e) => {
-    e.preventDefault();
-    const uploadInput = uploadInputRef.current;
-    if (uploadInput && uploadInput.files.length > 0) {
-      const domForm = new FormData();
-      domForm.append('uploadedphoto', uploadInput.files[0]);
-      axios.post("/photos/new", domForm)
-        .then(() => {
-          console.log("Photo uploaded successfully");
-          setUploadDialogOpen(false); // Close dialog after successful upload
-        })
-        .catch(error => {
-          console.error('Error uploading photo:', error);
-        });
-    }
-  };
-
-  const handleCloseDialog = () => {
-    setUploadDialogOpen(false); // Close dialog without uploading
-  };
-
   return (
-    <AppBar position="fixed">
-      <Toolbar>
-        <Typography variant="h6" color="inherit">
-          Group 4
-        </Typography>
-        <Box sx={{ flexGrow: 1 }} />
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', flexGrow: 1 }}>
-          <Typography variant="h6" color="inherit" textAlign={'center'}>
-            App Version:
+    <AppBar className="topbar-appBar" position="fixed">
+      <Modal open={openModal} onClose={() => setOpenModal(false)} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Add Image
           </Typography>
-          <Box sx={{ width: '10px' }} />
-          {version ? (
-            <Typography variant="body1" color="inherit">
-              {version}
-            </Typography>
+          <Input type="file" name="image" id="image" onChange={(e) => setFile(e.target.files[0])} />
+
+          {file && <img src={URL.createObjectURL(file)} alt="preview" className="img-preview" />}
+          <Button
+            onClick={() => {
+              const formData = new FormData();
+              formData.append("uploadedphoto", file);
+              axios
+                .post("http://localhost:3000/photos/new", formData)
+                .then((res) => {
+                  setOpenModal(false);
+                  history.push("/users/" + res.data.user_id);
+                })
+                .catch((err) => console.log(`Error + ${err}`));
+            }}
+          >
+            Add
+          </Button>
+        </Box>
+      </Modal>
+      <Toolbar>
+        <Box display="flex" justifyContent="space-between" width="100%" alignItems="center">
+          <Typography variant="h5" color="inherit">
+            Group 4
+          </Typography>
+          {props.user ? (
+            <>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+                <Typography>Hi {props?.user}!</Typography>
+                <Typography>{props?.title}</Typography>
+              </Box>
+              <Box display="flex" flexDirection="row" gap={4} alignItems="center">
+                <Link href="#/favorites" color="inherit">
+                  <Typography>My Favorites</Typography>
+                </Link>
+                <Typography>Version: {infoData?.version}</Typography>
+                <Button
+                  onClick={() => setOpenModal(true)}
+                  variant="outlined"
+                  sx={{
+                    backgroundColor: "white",
+                    "&:hover": {
+                      backgroundColor: "lightgray",
+                    },
+                  }}
+                >
+                  Add Image
+                </Button>
+                <Button
+                  onClick={logout}
+                  variant="outlined"
+                  sx={{
+                    backgroundColor: "white",
+                    "&:hover": {
+                      backgroundColor: "lightgray",
+                    },
+                  }}
+                >
+                  Logout
+                </Button>
+              </Box>
+            </>
           ) : (
-            <Typography variant="body1" color="inherit">
-              Loading...
-            </Typography>
+            <Button href="#/login-register" color="inherit">
+              Login/Register
+            </Button>
           )}
         </Box>
-        {user ? (
-          <>
-            <Button style={{ marginRight: '20px' }} color="inherit" onClick={handleUploadButtonClick}>Upload Photo</Button>
-            <Dialog open={uploadDialogOpen} onClose={handleCloseDialog}>
-              <DialogTitle>Upload New Photo</DialogTitle>
-              <DialogContent>
-                <input type="file" accept="image/*" ref={uploadInputRef} />
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseDialog} color="secondary">Cancel</Button>
-                <Button onClick={handleNewPhoto} color="primary">Submit Photo</Button>
-              </DialogActions>
-            </Dialog>
-            <Typography variant="h6" style={{ marginRight: '20px' }}>
-              Hi, {user.first_name}!
-            </Typography>
-            <Button color="inherit" onClick={handleLogout}>Logout</Button>
-          </>
-        ) : (
-          <Typography variant="h6">
-            Please login
-          </Typography>
-        )}
       </Toolbar>
     </AppBar>
   );
 }
-
 export default TopBar;
