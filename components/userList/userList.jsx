@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // import React, { useEffect, useState } from "react";
 // import { List, ListItem, ListItemText } from "@mui/material";
 // import "./userList.css";
@@ -34,6 +35,8 @@
 // export default UserList;
 
 
+=======
+>>>>>>> f7771d4aa7fc7fccb65a53461bc89c08c4a7b745
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { List, ListItem, ListItemText, CircularProgress, Box, Typography } from '@mui/material';
@@ -84,7 +87,11 @@ class UserList extends React.Component {
     }
 
     return (
+<<<<<<< HEAD
       <Box sx={{ width: '250px', margin: 'auto', padding: '20px', position: 'fixed', backgroundColor: '#ffffff'}}>
+=======
+      <Box sx={{ width: '300px', margin: 'auto', padding: '20px', position: 'fixed', backgroundColor: '#ffffff'}}>
+>>>>>>> f7771d4aa7fc7fccb65a53461bc89c08c4a7b745
         <Typography variant="h5" align="center" sx={{ marginBottom: '16px', color: '#3f51b5' }}>
           User List
         </Typography>
@@ -119,4 +126,8 @@ class UserList extends React.Component {
   }
 }
 
+<<<<<<< HEAD
 export default UserList;
+=======
+export default UserList;
+>>>>>>> f7771d4aa7fc7fccb65a53461bc89c08c4a7b745
